@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "423781699006",
+    "project_id": "lendflow-2b932",
+    "storage_bucket": "lendflow-2b932.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:423781699006:android:3dce782c131953330a3def",
+        "android_client_info": {
+          "package_name": "com.aistudio.lendflow.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_rRgNlrgh6qrBzEMqiZhOhWIQdrpMmGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
