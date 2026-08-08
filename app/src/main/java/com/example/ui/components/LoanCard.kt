@@ -1,6 +1,9 @@
 package com.example.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -55,6 +62,7 @@ fun LoanCard(
 ) {
     val loan = loanWithDetails.loan
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(false) }
 
     val progress = if (loanWithDetails.totalInstallments > 0) {
         (loanWithDetails.paidInstallmentsCount.toFloat() / loanWithDetails.totalInstallments.toFloat()).coerceIn(0f, 1f)
@@ -167,6 +175,64 @@ fun LoanCard(
                             border = BorderStroke(1.dp, BorderLight)
                         ) {
                             Text(text = "Partial", color = TextPrimary, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isExpanded = !isExpanded }
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(if (isExpanded) "Hide Schedule" else "View Schedule", color = PrimaryBlue, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    imageVector = if (isExpanded) Icons.Outlined.KeyboardArrowUp else Icons.Outlined.KeyboardArrowDown,
+                    contentDescription = "Toggle Schedule",
+                    tint = PrimaryBlue,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+
+            AnimatedVisibility(visible = isExpanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .background(Color(0xFFF8FAFC), RoundedCornerShape(12.dp))
+                        .padding(12.dp)
+                ) {
+                    for (i in 1..loanWithDetails.totalInstallments) {
+                        val payment = loanWithDetails.payments.find { it.installmentIndex == i }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Month $i", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                            if (payment != null) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    val payDateStr = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(payment.paymentDate))
+                                    Text("Paid on $payDateStr", fontSize = 12.sp, color = Color(0xFF16A34A))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Icon(Icons.Filled.CheckCircle, contentDescription = "Paid", tint = Color(0xFF16A34A), modifier = Modifier.size(14.dp))
+                                }
+                            } else {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("Pending", fontSize = 12.sp, color = TextSecondary)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Icon(Icons.Outlined.Schedule, contentDescription = "Pending", tint = TextSecondary, modifier = Modifier.size(14.dp))
+                                }
+                            }
                         }
                     }
                 }
