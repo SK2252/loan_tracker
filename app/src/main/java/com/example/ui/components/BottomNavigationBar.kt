@@ -76,7 +76,9 @@ fun LendFlowBottomNavigation(
                             text = destination.title.uppercase(),
                             fontSize = 10.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            letterSpacing = 0.8.sp
+                            letterSpacing = 0.5.sp,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
