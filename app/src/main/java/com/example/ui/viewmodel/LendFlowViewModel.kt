@@ -37,7 +37,8 @@ class LendFlowViewModel(application: Application) : AndroidViewModel(application
         )
 
         viewModelScope.launch {
-            repository.seedInitialMockDataIfNeeded()
+            repository.syncFromFirestoreIfNeeded()
+            repository.seedRealDataIfNeeded()
         }
 
         loansWithDetails = repository.loansWithDetails.stateIn(

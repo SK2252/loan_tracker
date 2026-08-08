@@ -5,6 +5,7 @@ import com.example.data.entity.FriendEntity
 import com.example.data.entity.LoanEntity
 import com.example.data.entity.PaymentEntity
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 object FirestoreSyncHelper {
     private val firestore: FirebaseFirestore? by lazy {
@@ -90,5 +91,83 @@ object FirestoreSyncHelper {
                     doc.reference.delete()
                 }
             }
+    }
+
+    // ─── Fetch all friends from Firestore ───────────────────────────────────
+    suspend fun fetchAllFriends(): List<FriendEntity> {
+        return try {
+            val snapshot = firestore?.collection("friends")?.get()?.await() ?: return emptyList()
+            snapshot.documents.mapNotNull { doc ->
+                try {
+                    FriendEntity(
+                        id = (doc.getLong("id") ?: 0L),
+                        name = doc.getString("name") ?: "",
+                        avatarColorHex = doc.getString("avatarColorHex") ?: "#2563EB",
+                        createdAt = doc.getLong("createdAt") ?: System.currentTimeMillis()
+                    )
+                } catch (e: Exception) {
+                    Log.e("LendFlow", "Error parsing friend doc: ${e.message}")
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("LendFlow", "Failed to fetch friends from Firestore: ${e.message}")
+            emptyList()
+        }
+    }
+
+    // ─── Fetch all loans from Firestore ─────────────────────────────────────
+    suspend fun fetchAllLoans(): List<LoanEntity> {
+        return try {
+            val snapshot = firestore?.collection("loans")?.get()?.await() ?: return emptyList()
+            snapshot.documents.mapNotNull { doc ->
+                try {
+                    LoanEntity(
+                        id = doc.getLong("id") ?: 0L,
+                        friendId = doc.getLong("friendId") ?: 0L,
+                        friendName = doc.getString("friendName") ?: "",
+                        loanAmount = doc.getDouble("loanAmount") ?: 0.0,
+                        startDate = doc.getLong("startDate") ?: 0L,
+                        repaymentMonths = (doc.getLong("repaymentMonths") ?: 0L).toInt(),
+                        monthlyAmount = doc.getDouble("monthlyAmount") ?: 0.0,
+                        totalRepayment = doc.getDouble("totalRepayment") ?: 0.0,
+                        notes = doc.getString("notes") ?: "",
+                        status = doc.getString("status") ?: "ACTIVE",
+                        createdAt = doc.getLong("createdAt") ?: System.currentTimeMillis()
+                    )
+                } catch (e: Exception) {
+                    Log.e("LendFlow", "Error parsing loan doc: ${e.message}")
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("LendFlow", "Failed to fetch loans from Firestore: ${e.message}")
+            emptyList()
+        }
+    }
+
+    // ─── Fetch all payments from Firestore ───────────────────────────────────
+    suspend fun fetchAllPayments(): List<PaymentEntity> {
+        return try {
+            val snapshot = firestore?.collection("payments")?.get()?.await() ?: return emptyList()
+            snapshot.documents.mapNotNull { doc ->
+                try {
+                    PaymentEntity(
+                        id = doc.getLong("id") ?: 0L,
+                        loanId = doc.getLong("loanId") ?: 0L,
+                        amount = doc.getDouble("amount") ?: 0.0,
+                        paymentDate = doc.getLong("paymentDate") ?: System.currentTimeMillis(),
+                        installmentIndex = (doc.getLong("installmentIndex") ?: 0L).toInt(),
+                        notes = doc.getString("notes") ?: ""
+                    )
+                } catch (e: Exception) {
+                    Log.e("LendFlow", "Error parsing payment doc: ${e.message}")
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("LendFlow", "Failed to fetch payments from Firestore: ${e.message}")
+            emptyList()
+        }
     }
 }
